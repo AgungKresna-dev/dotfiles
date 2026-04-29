@@ -1,0 +1,16 @@
+# Mengabaikan file metadata Git
+\.git
+\.gitignore
+\.gitmodules
+
+# Mengabaikan file dokumentasi dan lisensi
+README.*
+LICENSE.*
+CHANGELOG.*
+
+# Mengabaikan file sistem (khususnya jika Anda di macOS)
+\.DS_Store
+
+# Mengabaikan file konfigurasi Stow itu sendiri
+\.stow-local-ignore
+\.stow-global-ignore
