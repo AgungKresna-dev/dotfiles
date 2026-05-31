@@ -28,7 +28,7 @@ bindsym $mod+Shift+r restart
 exec --no-startup-id eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_github
 
 # Mengatur Wallpaper menggunakan feh
-exec_always --no-startup-id feh --bg-scale ~/.config/i3/wallpaper.jpg
+exec_always --no-startup-id feh --bg-fill ~/.config/i3/wallpaper/linux-arch-dark.jpg
 
 # Menjalankan Compositor (Picom) untuk mencegah screen tearing
 exec_always --no-startup-id picom -b
@@ -139,7 +139,7 @@ gaps outer 5
 # smart_gaps on
 
 # Opsional: Hilangkan border window sepenuhnya agar tampilan gaps lebih clean
-# default_border pixel 0
+default_border pixel 0
 
 # ------------------------------------------------------------------------------
 # 7. Konfigurasi Status Bar (i3bar)
