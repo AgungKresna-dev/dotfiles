@@ -4,7 +4,7 @@
 ; ==============================================================================
 
 [colors]
-; Palet Warna Gelap Universal (Bisa disesuaikan lewat xsettingsd/theme Anda)
+; Palet Warna Gelap Universal (Bisa disesuaikan lewat xsettingsd{{ .chezmoi.pathSeparator }}theme Anda)
 background = #1E1E2E
 background-alt = #313244
 foreground = #CDD6F4
@@ -13,7 +13,7 @@ secondary = #F5E0DC
 alert = #F38BA8
 disabled = #6C7086
 
-[bar/main]
+[bar{{ .chezmoi.pathSeparator }}main]
 width = 100%
 height = 28pt
 radius = 0
@@ -32,7 +32,7 @@ separator = |
 separator-foreground = ${colors.disabled}
 
 ; Menggunakan Lilex Nerd Font Anda untuk Teks & Ikon
-font-0 = "Lilex Nerd Font:size=10;2"
+font-0 = "Lilex Nerd Font{{ .chezmoi.pathListSeparator }}size=10;2"
 
 ; Susunan Modul (Kiri, Tengah, Kanan)
 modules-left = xworkspaces xwindow
@@ -46,8 +46,8 @@ enable-ipc = true
 tray-position = right
 tray-padding = 2
 
-[module/xworkspaces]
-type = internal/xworkspaces
+[module{{ .chezmoi.pathSeparator }}xworkspaces]
+type = internal{{ .chezmoi.pathSeparator }}xworkspaces
 
 label-active = %name%
 label-active-background = ${colors.background-alt}
@@ -65,20 +65,20 @@ label-empty = %name%
 label-empty-foreground = ${colors.disabled}
 label-empty-padding = 1
 
-[module/xwindow]
-type = internal/xwindow
-label = %title:0:60:...%
+[module{{ .chezmoi.pathSeparator }}xwindow]
+type = internal{{ .chezmoi.pathSeparator }}xwindow
+label = %title{{ .chezmoi.pathListSeparator }}0{{ .chezmoi.pathListSeparator }}60{{ .chezmoi.pathListSeparator }}...%
 
-[module/filesystem]
-type = internal/filesystem
+[module{{ .chezmoi.pathSeparator }}filesystem]
+type = internal{{ .chezmoi.pathSeparator }}filesystem
 interval = 25
-mount-0 = /
+mount-0 = {{ .chezmoi.pathSeparator }}
 label-mounted = 💾 %mountpoint% %percentage_used%%
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.disabled}
 
-[module/pulseaudio]
-type = internal/pulseaudio
+[module{{ .chezmoi.pathSeparator }}pulseaudio]
+type = internal{{ .chezmoi.pathSeparator }}pulseaudio
 format-volume-prefix = "🔊 "
 format-volume-prefix-foreground = ${colors.primary}
 format-volume = <label-volume>
@@ -86,22 +86,22 @@ label-volume = %percentage%%
 label-muted = 🔇 muted
 label-muted-foreground = ${colors.disabled}
 
-[module/memory]
-type = internal/memory
+[module{{ .chezmoi.pathSeparator }}memory]
+type = internal{{ .chezmoi.pathSeparator }}memory
 interval = 2
 format-prefix = "🧠 "
 format-prefix-foreground = ${colors.primary}
-label = %percentage_used:2%%
+label = %percentage_used{{ .chezmoi.pathListSeparator }}2%%
 
-[module/cpu]
-type = internal/cpu
+[module{{ .chezmoi.pathSeparator }}cpu]
+type = internal{{ .chezmoi.pathSeparator }}cpu
 interval = 2
 format-prefix = "⚙️ "
 format-prefix-foreground = ${colors.primary}
-label = %percentage:2%%
+label = %percentage{{ .chezmoi.pathListSeparator }}2%%
 
-[module/battery]
-type = internal/battery
+[module{{ .chezmoi.pathSeparator }}battery]
+type = internal{{ .chezmoi.pathSeparator }}battery
 full-at = 99
 low-at = 5
 battery = BAT0
@@ -112,10 +112,10 @@ format-discharging = 🔋 <label-discharging>
 label-charging = %percentage%%
 label-discharging = %percentage%%
 
-[module/date]
-type = internal/date
+[module{{ .chezmoi.pathSeparator }}date]
+type = internal{{ .chezmoi.pathSeparator }}date
 interval = 1
-date = %Y-%m-%d %H:%M:%S
+date = %Y-%m-%d %H{{ .chezmoi.pathListSeparator }}%M{{ .chezmoi.pathListSeparator }}%S
 label = 📅 %date%
 label-foreground = ${colors.primary}
 
