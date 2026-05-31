@@ -1,0 +1,146 @@
+# ==========================================
+# FONDASI UTAMA ZSH MURNI
+# ==========================================
+
+# Matikan tema bawaan grml jika masih menggunakannya
+prompt off 2>/dev/null
+
+# Menghubungkan Zsh dengan ssh-agent yang dikelola systemd
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+
+# --- KINERJA & SEKURITAS HISTORY ---
+HISTFILE=~/.zsh_history
+HISTSIZE=50000        # Kapasitas lebih besar untuk melacak pekerjaan berbulan-bulan
+SAVEHIST=50000
+
+setopt EXTENDED_HISTORY       # Menyimpan timestamp kapan perintah dieksekusi
+setopt SHARE_HISTORY          # Sinkronisasi riwayat antar tab secara real-time
+setopt HIST_IGNORE_ALL_DUPS   # Hapus duplikasi perintah lama jika mengetik yang baru
+setopt HIST_IGNORE_SPACE      # PENTING: Perintah yang diawali SPASI tidak akan masuk history (Aman untuk token/API key)
+setopt HIST_VERIFY            # Jangan langsung eksekusi perintah hasil pencarian history, biarkan user meninjau dulu
+setopt APPEND_HISTORY
+
+# --- PERFORMA TERMINAL ---
+# Menghindari lag saat melakukan autocomplete pada folder network/mounted drive
+zstyle ':completion:*' accept-exact '*(N)'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+# Aktifkan menu seleksi visual menggunakan tombol panah
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+# --- ADVANCED COMPLETION SYSTEM ---
+autoload -Uz compinit && compinit -u
+
+zstyle ':completion:*' menu select=2
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' # Mencocokkan substring & case-insensitive
+zstyle ':completion:*:descriptions' format '%F{green}-- %d --%f'             # Kelompokkan menu dengan deskripsi hijau
+zstyle ':completion:*:warnings' format '%F{red} Tidak ada kecocokan untuk: %d%f'
+
+# Pewarnaan pada menu autocomplete menggunakan database LS_COLORS sistem
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+
+# Inisialisasi sistem completion bawaan Zsh
+autoload -Uz compinit
+compinit -u
+
+# ==========================================
+# ALIASES & TOOLS MODERN
+# ==========================================
+#alias ls='eza --icons=always --git'
+#alias ll='eza -lh --icons=always --git'
+#alias la='eza -lah --icons=always --git'
+#alias grep='rg'
+#alias cd='z'
+
+# Plugin Syntax Highlighting (Pastikan paket zsh-syntax-highlighting sudah terinstall lewat pacman)
+if [ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+if [ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# Pencarian history cerdas berdasarkan kata yang sudah diketik
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+# Ikat (bind) ke tombol Panah Atas dan Bawah
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+
+# Shortcut Navigasi Cepat dengan fd + fzf
+fp() {
+  local dir
+  dir=$(fd ${1:-.} --type d 2>/dev/null | fzf +m) && cd "$dir"
+}
+
+# --- FUNCTIONS: SMART GIT WORKFLOW ---
+# Ketik 'gcap "pesan commit"' untuk melakukan add semua file, commit, dan push sekaligus
+gcap() {
+  git add . && git commit -m "$1" && git push origin $(git rev-parse --abbrev-ref HEAD)
+}
+
+# --- FUNCTIONS: DATA & DEVSECOPS UTILITIES ---
+# Ekstraksi file sekali sentuh untuk berbagai format kompresi data
+extract() {
+  if [ -f "$1" ] ; then
+    case "$1" in
+      *.tar.bz2)   tar xjf "$1"     ;;
+      *.tar.gz)    tar xzf "$1"     ;;
+      *.bz2)       bunzip2 "$1"     ;;
+      *.rar)       unrar x "$1"     ;;
+      *.gz)        gunzip "$1"      ;;
+      *.tar)       tar xf "$1"      ;;
+      *.tbz2)      tar xjf "$1"     ;;
+      *.tgz)       tar xzf "$1"     ;;
+      *.zip)       unzip "$1"       ;;
+      *.7z)        7z x "$1"        ;;
+      *)           echo "'$1' format tidak didukung via extract()" ;;
+    esac
+  else
+    echo "'$1' bukan file yang valid"
+  fi
+}
+
+# --- INTEGRASI FZF ADVANCED ---
+if command -v fzf >/dev/null 2>&1; then
+  # Jadikan ripgrep sebagai mesin pencari utama fzf (mengabaikan folder .git dan node_modules)
+  export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git" --glob "!node_modules"'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  
+  # Ketik 'flog' untuk mencari kata di dalam semua file teks/log secara visual dan interaktif
+  flog() {
+    rg --line-number --no-heading --color=always "${1:-.}" | fzf --ansi \
+      --color "hl:-1:underline,hl+:-1:underline:reverse" \
+      --delimiter : \
+      --preview 'bat --color=always --highlight-line {2} {1}' \
+      --preview-window 'up,60%,border-bottom,+{2}+3/3'
+  }
+fi
+
+# --- ALIASES: UTILITIES & NETWORKING ---
+alias grep='rg'
+alias ls='eza --icons=always --git'
+alias ll='eza -lh --icons=always --git'
+alias la='eza -lah --icons=always --git'
+alias ports='sudo ss -tulpn | grep LISTEN' # Cek port mana saja yang sedang dipakai backend apps
+alias myip='curl ifconfig.me'              # Cek public IP dengan cepat untuk konfigurasi firewall/whitelist
+
+# --- ALIASES: DOCKER PRODUCTION ---
+alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias dlogs='docker compose logs -f --tail=100' # Intip 100 baris log terakhir secara real-time
+alias dup='docker compose up -d'
+alias ddown='docker compose down'
+alias dexec='docker exec -it'                  # Masuk ke dalam kontainer: dexec <container_name> /bin/bash
+alias dclean='docker system prune --volumes -f' # Bersihkan cache docker yang memakan storage besar
+
+# ==========================================
+# INISIALISASI UTAMA (HARUS DI PALING BAWAH)
+# ==========================================
+motivate
+eval "$(zoxide init zsh)"
+eval "$(starship init zsh)"

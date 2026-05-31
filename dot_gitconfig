@@ -1,0 +1,10 @@
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[user]
+	email = 174786763+AgungKresna-dev@users.noreply.github.com
+	name = AgungKresna-dev
+[init]
+	defaultBranch = main

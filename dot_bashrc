@@ -1,0 +1,130 @@
+#
+# ~/.bashrc
+#
+
+# Menentukan ripgrep sebagai default command untuk fzf
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# Mengatur default editor jika ada aplikasi yang memanggil text editor terminal
+export EDITOR="nvim" # Ganti dengan vim/nvim jika Anda menggunakannya
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+[[ -f /usr/share/bash-preexec/bash-preexec.sh ]] && source /usr/share/bash-preexec/bash-preexec.sh
+
+# Ketik 'fp' untuk mencari folder secara visual dan langsung masuk ke sana
+fp() {
+  local dir
+  dir=$(fd ${1:-.} --type d 2>/dev/null | fzf +m) && cd "$dir"
+}
+
+# Ketik 'fe' untuk mencari file dan langsung membukanya dengan text editor utama
+fe() {
+  local file
+  file=$(fd ${1:-.} --type f 2>/dev/null | fzf +m) && [ -n "$file" ] && ${EDITOR:-nvim} "$file"
+}
+
+# Cari file yang mengandung kata tertentu secara global di folder saat ini
+ff() {
+    fd --type f --hidden --exclude .git "$1"
+}
+
+# Cari folder yang mengandung kata tertentu
+fdirc() {
+    fd --type d --hidden --exclude .git "$1"
+}
+
+extract() {
+  if [ -f "$1" ] ; then
+    case "$1" in
+      *.tar.bz2)   tar xjf "$1"     ;;
+      *.tar.gz)    tar xzf "$1"     ;;
+      *.bz2)       bunzip2 "$1"     ;;
+      *.rar)       unrar x "$1"     ;;
+      *.gz)        gunzip "$1"      ;;
+      *.tar)       tar xf "$1"      ;;
+      *.tbz2)      tar xjf "$1"     ;;
+      *.tgz)       tar xzf "$1"     ;;
+      *.zip)       unzip "$1"       ;;
+      *.Z)         uncompress "$1"  ;;
+      *.7z)        7z x "$1"        ;;
+      *)           echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# Aktifkan programmable completion features
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# Otomatis mengoreksi typo kecil saat mengetik nama folder dengan perintah 'cd'
+shopt -s cdspell
+
+# Otomatis memperbaiki typo penulisan huruf besar/kecil (case-insensitive) saat menekan Tab
+shopt -s nocaseglob
+
+# Pencarian history cerdas menggunakan tombol Panah Atas/Bawah
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+
+HISTSIZE=10000
+HISTFILESIZE=20000
+HISTCONTROL=ignoreboth
+
+# Amankan dan langsung sinkronisasikan history di setiap eksekusi perintah
+PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+PS1='[\u@\h \W]\$ '
+
+#Display ISO version and distribution information in short
+alias version="sed -n 1p /etc/os-release && sed -n 13p /etc/os-release && sed -n 14p /etc/os-release"
+
+# Konfirmasi sebelum menimpa file secara tidak sengaja
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+#Pacman Shortcuts
+alias sync="sudo pacman -Syyy"
+alias install="sudo pacman -S"
+alias update="sudo pacman -Syyu"
+alias search="sudo pacman -Ss"
+alias search-local="sudo pacman -Qs"
+alias pkg-info="sudo pacman -Qi"
+alias local-install="sudo pacman -U"
+alias clr-cache="sudo pacman -Scc"
+alias unlock="sudo rm /var/lib/pacman/db.lck"
+alias remove="sudo pacman -R"
+alias autoremove="sudo pacman -Rns"
+
+# Docker Shortcuts
+alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+alias dimages='docker images'
+alias ddown='docker compose down'
+alias dup='docker compose up -d'
+alias dlogs='docker compose logs -f'
+
+# Pembersihan massal untuk menghemat disk space
+alias dprune='docker system prune -a --volumes'
+
+# Cepat beralih ke root folder dari repositori Git tempat Anda berada saat ini
+alias cdgit='cd $(git rev-parse --show-toplevel 2>/dev/null || echo .)'
+
+# Shortcut Git Standar
+alias gstatus='git status -s'
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+
+eval "$(zoxide init bash)"
+eval "$(starship init bash)"
+
+# Jalankan perintah ini di baris paling bawah untuk melihat snapshot direktori aktif Anda
+#echo -e "\n\e[1;34m[Zoxide Recent Directories]\e[0m"
+#zoxide query -l | head -n 5
