@@ -1,3 +1,55 @@
+# ==============================================================================
+# Chezmoi Dotfiles Gitignore (Production-Ready)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. File Sampah Sistem Operasi & Desktop (OS Junk Files)
+# ------------------------------------------------------------------------------
 .DS_Store
-*.swp
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ------------------------------------------------------------------------------
+# 2. File Cache, Log, dan Riwayat Aplikasi (Logs and Caches)
+# ------------------------------------------------------------------------------
 *.log
+*.log.*
+*.gz
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+.npm/
+.cargo/
+.pnpm-store/
+
+# ------------------------------------------------------------------------------
+# 3. File Spesifik i3wm / X11 (Jangan masukkan log eror Xorg/i3)
+# ------------------------------------------------------------------------------
+.xsession-errors
+.xsession-errors.old
+Xrootenv
+
+# ------------------------------------------------------------------------------
+# 4. KEAMANAN MUTLAK: Kunci Rahasia & Kredensial (Secrets & Security)
+# ------------------------------------------------------------------------------
+# Memblokir semua file kunci SSH (jika Anda tidak sengaja memasukkannya ke folder chezmoi)
+*id_rsa*
+*id_ed25519*
+*id_github*
+*.pem
+*.key
+*.pub
+
+# Memblokir file kredensial cloud, database, dan API tokens
+.env
+.env.*
+*.secret
+*.token
+credentials
+*history     # Memblokir file riwayat command (seperti .bash_history) yang mengandung password
