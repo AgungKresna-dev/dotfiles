@@ -1,0 +1,54 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test-deployment:
+    name: Test Dotfiles Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Environment Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends i3-wm shellcheck curl
+
+      - name: Install Chezmoi
+        run: |
+          echo "==> Installing Chezmoi..."
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+
+      - name: Test Chezmoi Initialization & Apply
+        run: |
+          echo "==> Initializing chezmoi from local source..."
+          # Menguji apakah chezmoi bisa membaca source code saat ini dan menerapkannya ke komputer virtual ($HOME)
+          chezmoi init --source=$GITHUB_WORKSPACE
+          chezmoi apply --verbose
+
+      - name: Validate i3 Configuration Syntax
+        run: |
+          echo "==> Verifying deployed i3wm config syntax..."
+          i3 -C -c $HOME/.config/i3/config
+          echo "==> i3wm config validation passed!"
+
+      - name: Run ShellCheck on Bash Scripts
+        run: |
+          echo "==> Scanning deployed scripts..."
+          mapfile -t scripts < <(find $HOME/.config/i3 -type f \( -name "*.sh" -o -exec grep -l '^#!/bin/bash' {} + \) 2>/dev/null || true)
+          
+          if [ ${#scripts[@]} -gt 0 ]; then
+            shellcheck "${scripts[@]}"
+            echo "==> ShellCheck passed successfully!"
+          else
+            echo "==> No scripts found in deployment."
+          fi
