@@ -1,0 +1,60 @@
+# ==============================================================================
+# i3status Official Reference Configuration
+# Reference: https://i3wm.org/docs/i3status.html
+# ==============================================================================
+
+general {
+        colors = true
+        interval = 5
+        color_good = "#A6E3A1"
+        color_degraded = "#F9E2AF"
+        color_bad = "#F38BA8"
+}
+
+# Modul yang diaktifkan sesuai urutan penampilan bar (kanan ke kiri)
+order += "wireless _first_"
+order += "ethernet _first_"
+order += "battery all"
+order += "disk /"
+order += "load"
+order += "memory"
+order += "tztime local"
+
+wireless _first_ {
+        format_up = "📶 W: (%quality at %essid) %ip"
+        format_down = "📶 W: down"
+}
+
+ethernet _first_ {
+        format_up = "🌐 E: %ip (%speed)"
+        format_down = "🌐 E: down"
+}
+
+battery all {
+        format = "%status %percentage %remaining"
+        format_down = "No battery"
+        status_chr = "⚡ CHR"
+        status_bat = "🔋 BAT"
+        status_unk = "❓ UNK"
+        status_full = "☻ FULL"
+        path = "/sys/class/power_supply/BAT%d/uevent"
+        low_threshold = 10
+}
+
+disk "/" {
+        format = "💾 Free: %avail"
+}
+
+load {
+        format = "⚙️ CPU: %1min"
+}
+
+memory {
+        format = "🧠 RAM Used: %used | Total: %available"
+        threshold_degraded = "1G"
+        format_degraded = "MEMORY LOW: %available"
+}
+
+tztime local {
+        format = "📅 %Y-%m-%d 🕒 %H:%M:%S"
+}
