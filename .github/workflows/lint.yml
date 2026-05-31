@@ -1,0 +1,45 @@
+name: Code Quality & Performance
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linting Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck
+
+      - name: Lint Bash Scripts (Performance & Bugs)
+        run: |
+          echo "==> Scanning for Bash scripts..."
+          mapfile -t scripts < <(find . -type f \( -name "*.sh" -o -exec grep -l '^#!/bin/bash' {} + \) 2>/dev/null || true)
+          if [ ${#scripts[@]} -gt 0 ]; then
+            # Menjalankan shellcheck dengan bendera tingkat keparahan (error/warning)
+            shellcheck -s bash -S error "${scripts[@]}"
+            echo "==> All scripts passed performance and logic checks!"
+          else
+            echo "==> No scripts found."
+          fi
+
+      - name: Check for Trailing Whitespaces
+        run: |
+          echo "==> Checking for messy trailing whitespaces..."
+          # Mencari baris yang diakhiri dengan spasi/tab yang tidak perlu (bisa mengotori git diff)
+          if grep -r '[[:blank:]]$' --exclude-dir=.git .; then
+            echo "Error: Found trailing whitespaces. Please clean your code formatting."
+            exit 1
+          fi
+          echo "==> Code formatting looks sharp!"

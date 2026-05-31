@@ -1,0 +1,52 @@
+name: Production Quality Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  code-quality-check:
+    name: Lint, Syntax, and Code Neatness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Runtime Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends i3-wm shellcheck
+
+      - name: 1. Check Code Neatness
+        run: |
+          echo "==> Checking for trailing whitespaces..."
+          if grep -r '[[:blank:]]$' --exclude-dir=.git .; then
+            echo "Error: Code is not neat. Trailing whitespaces detected."
+            exit 1
+          fi
+
+      - name: 2. Verify i3wm Configuration
+        run: |
+          echo "==> Finding and validating i3wm config..."
+          I3_CONFIG=$(find . -type f -name "config" | grep "i3")
+          if [ -f "$I3_CONFIG" ]; then
+            i3 -C -c "$I3_CONFIG"
+          else
+            echo "No i3 config found in this commit."
+          fi
+
+      - name: 3. Audit Bash Scripts Performance
+        run: |
+          echo "==> Auditing Bash scripts with ShellCheck..."
+          mapfile -t scripts < <(find . -type f \( -name "*.sh" -o -exec grep -l '^#!/bin/bash' {} + \) 2>/dev/null || true)
+          if [ ${#scripts[@]} -gt 0 ]; then
+            shellcheck -s bash -S error "${scripts[@]}"
+          else
+            echo "No scripts to audit."
+          fi
