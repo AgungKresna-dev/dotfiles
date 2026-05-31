@@ -25,15 +25,18 @@ jobs:
 
       - name: 1. Check Code Neatness
         run: |
-          echo "==> Checking for trailing whitespaces..."
-          if grep -r '[[:blank:]]$' --exclude-dir=.git .; then
+          echo "==> Checking for trailing whitespaces (ignoring binaries)..."
+          # Bendera -I digunakan agar grep mengabaikan file biner seperti gambar .jpg
+          if grep -r -I '[[:blank:]]$' --exclude-dir=.git .; then
             echo "Error: Code is not neat. Trailing whitespaces detected."
             exit 1
           fi
+          echo "==> No trailing whitespaces found in text files!"
 
       - name: 2. Verify i3wm Configuration
         run: |
           echo "==> Finding and validating i3wm config..."
+          # Memastikan find hanya mencari file teks bernama "config" di dalam subfolder i3
           I3_CONFIG=$(find . -type f -name "config" | grep "i3")
           if [ -f "$I3_CONFIG" ]; then
             i3 -C -c "$I3_CONFIG"
